@@ -1,0 +1,326 @@
+val title = "Планшет Apple iPad 10.2 2021, 64GB 256GB, Wi-Fi • Новый • Оригинальный • Быстрая доставка в РФ".c
+val star =  "https://st.aliexpress.ru/resources/pdpv3/rating_icon.png".c
+val rating = "4.9".c
+val reviewsCount = "292 отзыва".c
+val buyersCount = "1 110 купили".c
+val bigImageArray = Array("https://ae04.alicdn.com/kf/Af3d7fa0528ea4cefacbc5a905b9a629b1.png_640x640.jpg".c,
+    "https://ae04.alicdn.com/kf/Af5d1eb77cd204342bfffa580ad8b33be3.png_640x640.jpgz".c)
+val textArray = Array("Cерый космос".c,"Cеребристый".c)
+val smallImageArray = Array("https://ae04.alicdn.com/kf/Af3d7fa0528ea4cefacbc5a905b9a629b1.png_120x120.jpg".c,
+    "https://ae04.alicdn.com/kf/Af5d1eb77cd204342bfffa580ad8b33be3.png_120x120.jpg".c)
+val displayPrice = "25 490 ₽".c
+val notDisplayedPrice = "51 498,58 ₽".c
+val counts = Array("В наличии 35 штук".c, "В наличии 22 штуки".c)
+val date = "2 мая".c
+val deliveryType = "курьером".c
+val deliveryPrice = "бесплатно".c
+val buyerProtection = "Защита покупателя 18 дн".c
+
+Column {
+        width { fill }
+        height { fill }
+
+        Text {
+            width { fill }
+
+            text {
+                "Планшет Apple iPad 10.2 2021, 64GB 256GB, Wi-Fi • Новый • Оригинальный • Быстрая доставка в РФ".c
+            }
+
+            lineHeight { 18.np }
+
+            textConfig {
+                fontStyle { semiBold }
+                fontSize { 15.np }
+            }
+
+            margin {
+                bottom { 8.np }
+            }
+        }
+
+        Row {
+            width { fill }
+            Image {
+                source { "https://st.aliexpress.ru/resources/pdpv3/rating_icon.png".c }
+                height { 16.np }
+                width { 16.np }
+                resizeMode { aspectFit }
+            }
+
+            Box {
+                width { 3.np }
+            }
+
+            Box {
+                padding { right { 8.np } }
+                Text {
+                    text { "4.9".c }
+                    textConfig {
+                        fontStyle { regular }
+                        fontSize { 13.np }
+                        color { color("#18181b") }
+                    }
+
+                    lineHeight { 16.np }
+                }
+            }
+
+            Box {
+                padding { right { 8.np } }
+                Text {
+                    text { "292 отзыва".c }
+                    textConfig {
+                        fontStyle { regular }
+                        fontSize { 13.np }
+                        color { color("#18181b") }
+                    }
+
+                    lineHeight { 16.np }
+                }
+            }
+
+            Box {
+                Text {
+                    text { "1 110 купили".c }
+                    textConfig {
+                        fontStyle { regular }
+                        fontSize { 13.np }
+                        color { color("#a0a0ab") }
+                    }
+
+                    lineHeight { 16.np }
+                }
+            }
+        }
+
+
+        Image {
+            width { 375.ap }
+            height { 391.ap }
+
+            source {
+                "https://ae04.alicdn.com/kf/Af3d7fa0528ea4cefacbc5a905b9a629b1.png_640x640.jpg".c
+            }
+        }
+
+
+
+        Column {
+            width { fill }
+
+            padding {
+                vertical { 8.np }
+            }
+
+            Text {
+                text {
+                    "Цвет: Cерый космос".c
+                }
+
+                padding {
+                    horizontal { 16.np }
+                    bottom { 8.np }
+                }
+
+                width { fill }
+                textConfig {
+                    color { color("#18181b") }
+                    fontStyle { regular }
+                    fontSize { 15.np }
+                }
+
+                lineHeight { 20.np }
+            }
+
+            Row {
+                padding {
+                    horizontal { 16.np }
+                    bottom { 8.np }
+                }
+
+                Box {
+                    height { 64.np }
+                    width { 64.np }
+
+                    background {
+                        cornersRadius { all { 8.np } }
+                        border {
+                            width { 2.np }
+                            color {  color("#444546") }
+                        }
+                    }
+
+                    Image {
+                        width { 56.np }
+                        height { 56.np }
+                        gravity { center }
+                        source { "https://ae04.alicdn.com/kf/Af3d7fa0528ea4cefacbc5a905b9a629b1.png_120x120.jpg".c }
+                        resizeMode { aspectFill }
+                    }
+                }
+
+                Box {
+                    height { 64.np }
+                    width { 64.np }
+
+                    background {
+                        cornersRadius { all { 8.np } }
+                        border {
+                            width { 2.np }
+                            color { color("#cdd5df") }
+                        }
+                    }
+
+                    margin { left { 8.np } }
+                    Image {
+                        width { 56.np }
+                        height { 56.np }
+                        gravity { center }
+                        source { "https://ae04.alicdn.com/kf/Af5d1eb77cd204342bfffa580ad8b33be3.png_120x120.jpg".c }
+                        resizeMode { aspectFill }
+                    }
+                }
+            }
+        }
+
+        Column {
+            width { fill }
+
+            margin {
+                horizontal { 8.np }
+            }
+
+            padding {
+                horizontal { 16.np }
+                bottom { 4.np }
+            }
+
+            background {
+                color { color("#FCFCFD") }
+                cornersRadius { all { 8.np } }
+                border {
+                    width { 1.np }
+                    color { color("#E6EAF0") }
+                }
+            }
+
+            Text {
+                gravity { left }
+                text { "25 490 ₽".c }
+                lineHeight { 28.np }
+                padding { bottom { 4.np } }
+
+                textConfig {
+                    color { color("#FF18181B") }
+                    fontStyle { semiBold }
+                    fontSize { 21.np }
+                }
+            }
+
+            Text {
+                gravity { left }
+                text { "51 498,58 ₽".c }
+                lineHeight { 16.np }
+                padding { bottom { 4.np } }
+
+                textConfig {
+                    color { color("#FFA0A0AB") }
+                    isStrikeThrough { true.c }
+                }
+            }
+
+            Text {
+                text { "В наличии 35 штук".c }
+                lineHeight { 12.np }
+
+                textConfig {
+                    color { color("#a0a0ab") }
+                    fontStyle { regular }
+                    fontSize { 11.np }
+                }
+            }
+        }
+
+        Box { height { 12.np } }
+
+
+        Column {
+            width { fill }
+            padding {
+                all { 16.np }
+            }
+
+            margin {
+                horizontal { 8.np }
+            }
+
+            background {
+                color { color("#FCFCFD") }
+                cornersRadius { all { 8.np } }
+                border {
+                    width { 1.np }
+                    color { color("#E6EAF0") }
+                }
+            }
+
+
+            Row {
+                padding { bottom { 8.np } }
+                Text {
+                    text { "2 мая".c }
+                    gravity { left }
+                    textConfig {
+                        color { color("#18181b") }
+                        fontStyle { regular }
+                        fontSize { 15.np }
+                    }
+
+                    lineHeight { 20.np }
+                    padding { right { 8.np } }
+                }
+
+                Text {
+                    text { "курьером".c }
+                    gravity { left }
+                    textConfig {
+                        color { color("#a0a0ab") }
+                        fontStyle { regular }
+                        fontSize { 15.np }
+                    }
+
+                    padding { right { 150.np } }
+                    lineHeight { 20.np }
+                }
+
+                Text {
+                    text { "Бесплатно".c }
+                    gravity { right }
+                    textConfig {
+                        color { color("#00ad30") }
+                        fontStyle { regular }
+                        fontSize { 15.np }
+                    }
+
+                    lineHeight { 20.np }
+                }
+            }
+
+            Box {
+                width { fill }
+                height { 1.np }
+                background { color { color("#E6EAF0") } }
+            }
+
+            Text {
+                padding { top { 8.np } }
+                text { "Защита покупателя 18 дн".c }
+                lineHeight { 12.np }
+                textConfig {
+                    color { color("#A0A0AB") }
+                    fontStyle { regular }
+                    fontSize { 11.np }
+                }
+            }
+        }
+    }

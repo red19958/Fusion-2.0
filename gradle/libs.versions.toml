@@ -1,0 +1,22 @@
+[versions]
+agp = "8.5.0-alpha05"
+kotlinStdlib = "1.9.22"
+antlr4Runtime = "4.13.1"
+kotlin = "1.9.22"
+ktx = "1.13.0"
+glideCompose = "1.0.0-beta01"
+
+[libraries]
+antlr4Runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr4Runtime" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }
+material3 = { module = "androidx.compose.material3:material3" }
+activityCompose =  { module= "androidx.activity:activity-compose"}
+glideCompose = { module = "com.github.bumptech.glide:compose", version.ref = "glideCompose" }
+ktxCoreAndroid = { module = "androidx.core:core-ktx", version.ref = "ktx" }
+appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
+

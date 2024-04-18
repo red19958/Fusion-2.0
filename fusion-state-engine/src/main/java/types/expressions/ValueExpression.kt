@@ -1,0 +1,3 @@
+package types.expressions
+
+sealed interface ValueExpression
