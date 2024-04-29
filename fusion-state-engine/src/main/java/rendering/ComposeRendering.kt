@@ -96,6 +96,7 @@ import types.Overflow
 import types.ResizeMode
 import types.expressions.AttrExpressionType
 import types.expressions.Const
+import types.expressions.ExpressionWithValue
 import types.expressions.GetExpression
 import util.FList
 import util.FMap
@@ -118,6 +119,20 @@ object ComposeRendering {
         ignoreWidth: Boolean = false,
         parenModification: ParentModification? = null,
     ) {
+        val isVisible = node.viewAttributes.isVisible
+        val isVisibleValue = if (isVisible?.value != null) {
+            isVisible.value!!
+        } else if (isVisible?.expression != null) {
+            getAttrFromExpression(
+                isVisible.expression!!,
+                realState = realState
+            )
+        } else {
+            true
+        }
+
+        if (!isVisibleValue) return
+
         var modifier = parenModification?.let { it(node) } ?: Modifier
         modifier = modifier.renderBaseAttr(
             node = node,
@@ -140,19 +155,65 @@ object ComposeRendering {
             is TextNode -> {
                 val colorInt = node.textAttributes.config?.color?.toColorInt()
                 val color = if (colorInt == null) Color.Unspecified else Color(colorInt)
-                val isUnderline = node.textAttributes.config?.isUnderline
-                val isStrikeThrough = node.textAttributes.config?.isStrikeThrough
 
-                val decoration = when (isUnderline) {
+                val isUnderline = node.textAttributes.config?.isUnderline
+                val isUnderlineValue = if (isUnderline?.value != null) {
+                    isUnderline.value!!
+                } else if (isUnderline?.expression != null) {
+                    getAttrFromExpression(
+                        isUnderline.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    false
+                }
+
+                val isStrikeThrough = node.textAttributes.config?.isStrikeThrough
+                val isStrikeThroughValue = if (isStrikeThrough?.value != null) {
+                    isStrikeThrough.value!!
+                } else if (isStrikeThrough?.expression != null) {
+                    getAttrFromExpression(
+                        isStrikeThrough.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    false
+                }
+
+                val decoration = when (isUnderlineValue) {
                     true -> TextDecoration.Underline
                     else -> TextDecoration.None
-                } + when (isStrikeThrough) {
+                } + when (isStrikeThroughValue) {
                     true -> TextDecoration.LineThrough
                     else -> TextDecoration.None
                 }
 
+                val text = node.textAttributes.text
+                val textValue = if (text?.value != null) {
+                    text.value!!
+                } else if (text?.expression != null) {
+                    getAttrFromExpression(
+                        text.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    ""
+                }
+
+                val maxLines = node.textAttributes.maxLines
+                val maxLinesValue = if (maxLines?.value != null) {
+                    maxLines.value!!
+                } else if (maxLines?.expression != null) {
+                    getAttrFromExpression(
+                        maxLines.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    Int.MAX_VALUE
+                }
+
                 Text(
-                    text = node.textAttributes.text ?: "",
+                    text = textValue,
                     modifier = modifier
                         .wrapContentHeight(Alignment.CenterVertically),
                     color = color,
@@ -163,38 +224,96 @@ object ComposeRendering {
                     textAlign = node.textAttributes.align?.toTextAlign() ?: TextAlign.Start,
                     lineHeight = node.textAttributes.lineHeight?.toSp() ?: TextUnit.Unspecified,
                     overflow = node.textAttributes.overflow?.toTextOverflow() ?: TextOverflow.Clip,
-                    maxLines = node.textAttributes.maxLines ?: Int.MAX_VALUE,
+                    maxLines = maxLinesValue,
                 )
             }
 
             is TextFieldNode -> {
-                var text by remember { mutableStateOf(node.textFieldAttributes.text ?: "") }
+                val text = node.textFieldAttributes.text
+
+                val textValue = if (text?.value != null) {
+                    text.value!!
+                } else if (text?.expression != null) {
+                    getAttrFromExpression(
+                        text.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    ""
+                }
+
+                var textRemember by remember { mutableStateOf(textValue) }
                 val colorInt = node.textFieldAttributes.config?.color?.toColorInt()
                 val color = if (colorInt == null) Color.Unspecified else Color(colorInt)
 
                 val isUnderline = node.textFieldAttributes.config?.isUnderline
-                val isStrikeThrough = node.textFieldAttributes.config?.isStrikeThrough
+                val isUnderlineValue = if (isUnderline?.value != null) {
+                    isUnderline.value!!
+                } else if (isUnderline?.expression != null) {
+                    getAttrFromExpression(
+                        isUnderline.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    false
+                }
 
-                val decoration = when (isUnderline) {
+                val isStrikeThrough = node.textFieldAttributes.config?.isStrikeThrough
+                val isStrikeThroughValue = if (isStrikeThrough?.value != null) {
+                    isStrikeThrough.value!!
+                } else if (isStrikeThrough?.expression != null) {
+                    getAttrFromExpression(
+                        isStrikeThrough.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    false
+                }
+
+                val decoration = when (isUnderlineValue) {
                     true -> TextDecoration.Underline
                     else -> TextDecoration.None
-                } + when (isStrikeThrough) {
+                } + when (isStrikeThroughValue) {
                     true -> TextDecoration.LineThrough
                     else -> TextDecoration.None
                 }
 
                 val keyboardOptions =
-                    createKeyboardOptions(node.textFieldAttributes.keyboardOptions)
+                    createKeyboardOptions(node.textFieldAttributes.keyboardOptions, realState)
+
+                val isEnabled = node.viewAttributes.isEnabled
+                val isEnabledValue = if (isEnabled?.value != null) {
+                    isEnabled.value!!
+                } else if (isEnabled?.expression != null) {
+                    getAttrFromExpression(
+                        isEnabled.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    true
+                }
+
+                val isMultiline = node.textFieldAttributes.isMultiline
+                val isMultilineValue = if (isMultiline?.value != null) {
+                    isMultiline.value!!
+                } else if (isMultiline?.expression != null) {
+                    getAttrFromExpression(
+                        isMultiline.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    true
+                }
 
                 BasicTextField(
                     value = TextFieldValue(
-                        text = text,
-                        selection = TextRange(text.length)
+                        text = textRemember,
+                        selection = TextRange(textRemember.length)
                     ),
-                    onValueChange = { value -> text = value.text }, // Вообще-то задается атрибутами
+                    onValueChange = { value -> textRemember = value.text },
                     modifier = modifier
                         .wrapContentHeight(Alignment.CenterVertically),
-                    enabled = node.viewAttributes.isEnabled,
+                    enabled = isEnabledValue,
                     keyboardOptions = keyboardOptions,
                     textStyle = TextStyle(
                         color = color,
@@ -203,7 +322,7 @@ object ComposeRendering {
                         lineHeight = node.textFieldAttributes.lineHeight?.toSp()
                             ?: TextUnit.Unspecified,
                     ),
-                    singleLine = !node.textFieldAttributes.isMultiline,
+                    singleLine = !isMultilineValue,
                 )
             }
 
@@ -212,6 +331,7 @@ object ComposeRendering {
                     node.imageAttributes.placeholder,
                     node.imageAttributes.placeHolderTint,
                     node.imageAttributes.tint,
+                    realState,
                 )
 
                 val transition = when (node.imageAttributes.animateChanges) {
@@ -219,14 +339,38 @@ object ComposeRendering {
                     else -> null
                 }
 
+                val source = node.imageAttributes.source
+                val sourceValue = if (source?.value != null) {
+                    source.value!!
+                } else if (source?.expression != null) {
+                    getAttrFromExpression(
+                        source.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    ""
+                }
+                val tint = node.imageAttributes.tint
+                val tintValue = if (tint?.value != null) {
+                    tint.value!!
+                } else if (tint?.expression != null) {
+                    getAttrFromExpression<String>(
+                        tint.expression!!,
+                        realState = realState
+                    )
+                } else {
+                    null
+                }
+
+
                 GlideImage(
                     modifier = modifier,
-                    model = node.imageAttributes.source ?: "",
+                    model = sourceValue,
                     contentDescription = null,
                     contentScale = node.imageAttributes.resizeMode.toContentScale(),
                     loading = placeholder,
                     failure = placeholder,
-                    colorFilter = node.imageAttributes.tint?.let {
+                    colorFilter = tintValue?.let {
                         ColorFilter.tint(Color(it.toColorInt()))
                     },
                     transition = transition,
@@ -244,7 +388,19 @@ object ComposeRendering {
         ignoreWidth: Boolean = false,
         parenModification: ParentModification? = null
     ) {
-        if (!node.viewAttributes.isVisible) return
+        val isVisible = node.viewAttributes.isVisible
+        val isVisibleValue = if (isVisible?.value != null) {
+            isVisible.value!!
+        } else if (isVisible?.expression != null) {
+            getAttrFromExpression(
+                isVisible.expression!!,
+                realState = realState
+            )
+        } else {
+            true
+        }
+
+        if (!isVisibleValue) return
 
         var modifier = parenModification?.let { it(node) } ?: Modifier
         modifier = modifier.renderBaseAttr(
@@ -269,7 +425,7 @@ object ComposeRendering {
                 Column(modifier) {
                     for (child in node.children) {
                         Render(node = child, realState = realState, ignoreHeight = true) { value ->
-                            weight(value).then(gravity(value))
+                            weight(value, realState).then(gravity(value))
                         }
                     }
                 }
@@ -279,7 +435,7 @@ object ComposeRendering {
                 Row(modifier) {
                     for (child in node.children) {
                         Render(node = child, realState = realState, ignoreWidth = true) { value ->
-                            weight(value).then(gravity(value))
+                            weight(value, realState).then(gravity(value))
                         }
                     }
                 }
@@ -290,7 +446,6 @@ object ComposeRendering {
                     modifier = modifier,
                     horizontalArrangement = Arrangement.spacedBy(node.flowRowAttributes.horizontalSpacing.toDp()),
                     verticalArrangement = Arrangement.spacedBy(node.flowRowAttributes.verticalSpacing.toDp()),
-                    // maxLines поддержка очень большая, потому что ExperimentalApi
                 ) {
                     for (child in node.children) {
                         Render(node = child, realState = realState)
@@ -305,7 +460,7 @@ object ComposeRendering {
                             Render(
                                 node = child,
                                 realState = realState
-                            ) // Сделать правильно из DSL парсинг
+                            ) // TODO: rework
                         }
                     }
                 }
@@ -315,7 +470,7 @@ object ComposeRendering {
                 LazyRow(modifier) {
                     items(node.children.size) {
                         for (child in node.children) {
-                            Render(node = child, realState = realState) //
+                            Render(node = child, realState = realState) // TODO: rework
                         }
                     }
                 }
@@ -327,12 +482,17 @@ object ComposeRendering {
      * Provide weights for children in [ColumnScope].
      */
     @SuppressLint("ModifierFactoryExtensionFunction")
-    private fun ColumnScope.weight(node: Node): Modifier {
+    private fun ColumnScope.weight(node: Node, realState: MutableState<State>): Modifier {
         var result: Modifier = Modifier
         val weight = node.layoutAttributes.weight
 
         if (weight != null) {
-            result = result.weight(weight.toFloat())
+            result = result.weight(
+                weight.value?.toFloat() ?: getAttrFromExpression<Double>(
+                    weight.expression!!,
+                    realState = realState
+                ).toFloat()
+            )
         }
 
         return result
@@ -342,12 +502,17 @@ object ComposeRendering {
      * Provide weights for children in [RowScope].
      */
     @SuppressLint("ModifierFactoryExtensionFunction")
-    private fun RowScope.weight(node: Node): Modifier {
+    private fun RowScope.weight(node: Node, realState: MutableState<State>): Modifier {
         var result: Modifier = Modifier
         val weight = node.layoutAttributes.weight
 
         if (weight != null) {
-            result = result.weight(weight.toFloat())
+            result = result.weight(
+                weight.value?.toFloat() ?: getAttrFromExpression<Double>(
+                    weight.expression!!,
+                    realState = realState
+                ).toFloat()
+            )
         }
 
         return result
@@ -504,21 +669,40 @@ object ComposeRendering {
         val padding = viewAttributes.padding
         val background = viewAttributes.background
 
-        if (testTag != null) result = result.testTag(testTag)
+        if (testTag != null) {
+            result = result.testTag(
+                testTag.value ?: getAttrFromExpression(
+                    testTag.expression!!,
+                    realState = realState
+                )
+            )
+        }
 
         if (alpha != null) {
             result = result.alpha(
-                alpha.value ?: getAttrFromExpression<Double>(
+                alpha.value ?: getAttrFromExpression(
                     alpha.expression!!,
                     realState = realState
-                ).toFloat()
+                )
             )
         }
 
         if (background != null) {
             val border = background.border
             val width = border?.width
-            val colorBorder = border?.color?.toColorInt() ?: 0
+
+            val colorBorder = border?.color
+            val colorBorderValue = if (colorBorder?.value != null) {
+                colorBorder.value!!.toColorInt()
+            } else if (colorBorder?.expression != null) {
+                getAttrFromExpression<String>(
+                    colorBorder.expression!!,
+                    realState = realState
+                ).toColorInt()
+            } else {
+                0
+            }
+
             val dashSize = border?.dashSize
             val dashGap = border?.dashGap
 
@@ -528,7 +712,17 @@ object ComposeRendering {
             val leftBottom = cornersRadius?.leftBottom.toDp()
             val rightBottom = cornersRadius?.rightBottom.toDp()
 
-            val color = background.color?.toColorInt() ?: 0
+            val color = background.color
+            val colorValue = if (color?.value != null) {
+                color.value!!.toColorInt()
+            } else if (color?.expression != null) {
+                getAttrFromExpression<String>(
+                    color.expression!!,
+                    realState = realState
+                ).toColorInt()
+            } else {
+                0
+            }
 
             val shape = RoundedCornerShape(
                 topStart = leftTop,
@@ -541,7 +735,7 @@ object ComposeRendering {
                 if (dashGap == null || dashSize == null) {
                     result = result.border(
                         width = width.toDp(),
-                        color = Color(colorBorder),
+                        color = Color(colorBorderValue),
                         shape = shape
                     )
                 } else {
@@ -574,7 +768,7 @@ object ComposeRendering {
 
                         drawPath(
                             path = path,
-                            color = Color(colorBorder),
+                            color = Color(colorBorderValue),
                             style = stroke
                         )
                     }
@@ -583,7 +777,7 @@ object ComposeRendering {
 
             if (background.color != null) {
                 result = result.background(
-                    color = Color(color),
+                    color = Color(colorValue),
                     shape = shape
                 )
             }
@@ -742,14 +936,37 @@ object ComposeRendering {
 
     @OptIn(ExperimentalGlideComposeApi::class)
     private fun createGlidePlaceholder(
-        placeholder: String?,
-        placeholderTint: String?,
-        tint: String?,
+        placeholder: ExpressionWithValue<String>?,
+        placeholderTint: ExpressionWithValue<String>?,
+        tint: ExpressionWithValue<String>?,
+        realState: MutableState<State>,
     ): Placeholder {
         val glidePlaceholder = if (placeholder == null) {
             null
         } else {
-            ColorDrawable((placeholderTint ?: tint ?: placeholder).toColorInt())
+            val placeholderTintValue = if (placeholderTint?.value != null) {
+                placeholderTint.value!!
+            } else if (placeholderTint?.expression != null) {
+                getAttrFromExpression<String>(placeholderTint.expression!!, realState = realState)
+            } else {
+                null
+            }
+
+            val tintValue = if (tint?.value != null) {
+                tint.value!!
+            } else if (tint?.expression != null) {
+                getAttrFromExpression<String>(tint.expression!!, realState = realState)
+            } else {
+                null
+            }
+
+            val placeholderValue = if (placeholder.value != null) {
+                placeholder.value!!
+            } else {
+                getAttrFromExpression(placeholder.expression!!, realState = realState)
+            }
+
+            ColorDrawable((placeholderTintValue ?: tintValue ?: placeholderValue).toColorInt())
         }.let { placeholder(it) }
 
         return glidePlaceholder
@@ -807,18 +1024,30 @@ object ComposeRendering {
         }
     }
 
-    private fun createKeyboardOptions(keyboardOptions: KeyboardOptions?): ComposeKeyboardOptions {
+    private fun createKeyboardOptions(
+        keyboardOptions: KeyboardOptions?,
+        realState: MutableState<State>
+    ): ComposeKeyboardOptions {
         val capitalization = keyboardOptions?.capitalization.toComposeCapitalization()
-        val autoCorrect = keyboardOptions?.autoCorrect ?: false
+
+        val autoCorrect = keyboardOptions?.autoCorrect
+        val autoCorrectValue = if (autoCorrect?.value != null) {
+            autoCorrect.value!!
+        } else if (autoCorrect?.expression != null) {
+            getAttrFromExpression(
+                autoCorrect.expression!!,
+                realState = realState
+            )
+        } else {
+            false
+        }
+
         val keyboardType = keyboardOptions?.keyboardType.toComposeKeyboardType()
         val imeAction = keyboardOptions?.imeAction.toComposeIme()
 
-        // Нет реализации для Fusion
-        val inputAccessoryAction = keyboardOptions?.inputAccessoryAction
-
         return ComposeKeyboardOptions(
             capitalization = capitalization,
-            autoCorrect = autoCorrect,
+            autoCorrect = autoCorrectValue,
             keyboardType = keyboardType,
             imeAction = imeAction,
         )
@@ -962,18 +1191,34 @@ object ComposeRendering {
 
                 return when (equals) {
                     null -> {
-                        when (trueValue) {
-                            is AttrExpressionType.FieldExpr -> {
-                                getAttrFromExpression(trueValue, realState)
+                        when (firstArg) {
+                            is Const.BooleanConst -> {
+                                if (firstArg.value) {
+                                    when (trueValue) {
+                                        is AttrExpressionType.FieldExpr -> {
+                                            getAttrFromExpression(trueValue, realState)
+                                        }
+
+                                        is Const -> {
+                                            trueValue.value as T
+                                        }
+                                    }
+                                } else {
+                                    when (falseValue) {
+                                        is AttrExpressionType.FieldExpr -> {
+                                            getAttrFromExpression(falseValue, realState)
+                                        }
+
+                                        is Const -> {
+                                            falseValue.value as T
+                                        }
+
+                                        else -> throw IllegalArgumentException()
+                                    }
+                                }
                             }
 
-                            is Const -> {
-                                trueValue.value as T
-                            }
-
-                            else -> {
-                                throw IllegalArgumentException()
-                            }
+                            else -> throw IllegalArgumentException()
                         }
                     }
 
@@ -988,10 +1233,6 @@ object ComposeRendering {
 
                                 is Const -> {
                                     trueValue.value as T
-                                }
-
-                                else -> {
-                                    throw IllegalArgumentException()
                                 }
                             }
                         } else {
@@ -1022,10 +1263,6 @@ object ComposeRendering {
 
                                 is Const -> {
                                     trueValue.value as T
-                                }
-
-                                else -> {
-                                    throw IllegalArgumentException()
                                 }
                             }
 

@@ -244,17 +244,17 @@ object Parser {
                             state[name] = arr
                         }
 
-                        is FbooleanArrValueContext  -> {
+                        is FbooleanArrValueContext -> {
                             arr = parseArray(tokensForValue, ::parseFBoolean)
                             state[name] = arr
                         }
 
-                        is FdoubleArrValueContext  -> {
+                        is FdoubleArrValueContext -> {
                             arr = parseArray(tokensForValue, ::parseFDouble)
                             state[name] = arr
                         }
 
-                        is FlongArrValueContext  -> {
+                        is FlongArrValueContext -> {
                             arr = parseArray(tokensForValue, ::parseFLong)
                             state[name] = arr
                         }
@@ -341,7 +341,14 @@ object Parser {
                         }
 
                         WEIGHT -> {
-                            layoutAttributes.weight = parseFDouble(tokensForValue)
+                            layoutAttributes.weight = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                layoutAttributes.weight?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                layoutAttributes.weight?.value = parseFDouble(tokensForValue)
+                            }
                         }
 
                         GRAVITY -> {
@@ -365,7 +372,14 @@ object Parser {
 
                     when (attrToken.text) {
                         TEST_TAG -> {
-                            viewAttributes.testTag = parseFString(tokensForValue)
+                            viewAttributes.testTag = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                viewAttributes.testTag?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                viewAttributes.testTag?.value = parseFString(tokensForValue)
+                            }
                         }
 
                         ALPHA -> {
@@ -388,11 +402,25 @@ object Parser {
                         }
 
                         IS_ENABLED -> {
-                            viewAttributes.isEnabled = parseFBoolean(tokensForValue)
+                            viewAttributes.isEnabled = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                viewAttributes.isEnabled?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                viewAttributes.isEnabled?.value = parseFBoolean(tokensForValue)
+                            }
                         }
 
                         IS_VISIBLE -> {
-                            viewAttributes.isVisible = parseFBoolean(tokensForValue)
+                            viewAttributes.isVisible = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                viewAttributes.isVisible?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                viewAttributes.isVisible?.value = parseFBoolean(tokensForValue)
+                            }
                         }
 
                         else -> {
@@ -421,7 +449,14 @@ object Parser {
 
                     when (attrToken.text) {
                         MAX_LINES_COUNT -> {
-                            flowRowAttributes.maxLinesCount = parseFInt(tokensForValue)
+                            flowRowAttributes.maxLinesCount = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                flowRowAttributes.maxLinesCount?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                flowRowAttributes.maxLinesCount?.value = parseFInt(tokensForValue)
+                            }
                         }
 
                         HORIZONTAL_SPACING -> {
@@ -460,7 +495,14 @@ object Parser {
 
                     when (attrToken.text) {
                         TEXT -> {
-                            textAttributes.text = parseFString(tokensForValue)
+                            textAttributes.text = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                textAttributes.text?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                textAttributes.text?.value = parseFString(tokensForValue)
+                            }
                         }
 
                         TEXT_CONFIG -> {
@@ -476,7 +518,14 @@ object Parser {
                         }
 
                         MAX_LINES -> {
-                            textAttributes.maxLines = parseFInt(tokensForValue)
+                            textAttributes.maxLines = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                textAttributes.maxLines?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                textAttributes.maxLines?.value = parseFInt(tokensForValue)
+                            }
                         }
 
                         LINE_HEIGHT -> {
@@ -514,22 +563,47 @@ object Parser {
 
                     when (attrToken.text) {
                         SOURCE -> {
-                            imageAttributes.source = parseFString(tokensForValue)
+                            imageAttributes.source = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                imageAttributes.source?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                imageAttributes.source?.value = parseFString(tokensForValue)
+                            }
                         }
 
                         PLACEHOLDER -> {
-                            imageAttributes.placeholder =
-                                parseString(tokensForColor)
+                            imageAttributes.placeholder = ExpressionWithValue()
+
+                            if (tokensForColor.payload is AttrExpressionContext) {
+                                imageAttributes.placeholder?.expression =
+                                    parseAttrExpression(tokensForColor)
+                            } else {
+                                imageAttributes.placeholder?.value = parseString(tokensForColor)
+                            }
                         }
 
                         PLACEHOLDER_TINT -> {
-                            imageAttributes.placeHolderTint =
-                                parseString(tokensForColor)
+                            imageAttributes.placeHolderTint = ExpressionWithValue()
+
+                            if (tokensForColor.payload is AttrExpressionContext) {
+                                imageAttributes.placeHolderTint?.expression =
+                                    parseAttrExpression(tokensForColor)
+                            } else {
+                                imageAttributes.placeHolderTint?.value = parseString(tokensForColor)
+                            }
                         }
 
                         TINT -> {
-                            imageAttributes.tint =
-                                parseString(tokensForColor)
+                            imageAttributes.tint = ExpressionWithValue()
+
+                            if (tokensForColor.payload is AttrExpressionContext) {
+                                imageAttributes.tint?.expression =
+                                    parseAttrExpression(tokensForColor)
+                            } else {
+                                imageAttributes.tint?.value = parseString(tokensForColor)
+                            }
                         }
 
                         RESIZE_MODE -> {
@@ -567,7 +641,14 @@ object Parser {
 
                     when (attrToken.text) {
                         TEXT -> {
-                            textFieldAttributes.text = parseFString(tokensForValue)
+                            textFieldAttributes.text = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                textFieldAttributes.text?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                textFieldAttributes.text?.value = parseFString(tokensForValue)
+                            }
                         }
 
                         CONFIG -> {
@@ -583,7 +664,15 @@ object Parser {
                         }
 
                         IS_MULTILINE -> {
-                            textFieldAttributes.isMultiline = parseFBoolean(tokensForValue)
+                            textFieldAttributes.isMultiline = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                textFieldAttributes.isMultiline?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                textFieldAttributes.isMultiline?.value =
+                                    parseFBoolean(tokensForValue)
+                            }
                         }
 
                         KEYBOARD_OPTIONS -> {
@@ -902,8 +991,17 @@ object Parser {
                         }
 
                         is ColorContext -> {
-                            background.color =
-                                parseString(tokensForParsingNode.getChild(2).getChild(2))
+                            val tokensForValue = tokensForParsingNode.getChild(2)
+                            val tokensForColor = tokensForValue.getChild(2)
+
+                            background.color = ExpressionWithValue()
+
+                            if (tokensForColor.payload is AttrExpressionContext) {
+                                background.color?.expression =
+                                    parseAttrExpression(tokensForColor)
+                            } else {
+                                background.color?.value = parseString(tokensForColor)
+                            }
                         }
 
                         else -> {
@@ -929,6 +1027,7 @@ object Parser {
                 is BorderAttrContext -> {
                     val tokensForParsingNode = temp.getChild(0)
                     val tokensForValue = tokensForParsingNode.getChild(2)
+                    val tokensForColor = tokensForValue.getChild(2)
 
                     when (tokensForParsingNode) {
                         is WidthExactContext -> {
@@ -936,8 +1035,14 @@ object Parser {
                         }
 
                         is ColorContext -> {
-                            border.color =
-                                parseString(tokensForParsingNode.getChild(2).getChild(2))
+                            border.color = ExpressionWithValue()
+
+                            if (tokensForColor.payload is AttrExpressionContext) {
+                                border.color?.expression =
+                                    parseAttrExpression(tokensForColor)
+                            } else {
+                                border.color?.value = parseString(tokensForColor)
+                            }
                         }
 
                         is DashSizeContext -> {
@@ -1172,11 +1277,25 @@ object Parser {
                         }
 
                         is IsUnderlineContext -> {
-                            config.isUnderline = parseFBoolean(tokensForValue)
+                            config.isUnderline = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                config.isUnderline?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                config.isUnderline?.value = parseFBoolean(tokensForValue)
+                            }
                         }
 
                         is IsStrikeThroughContext -> {
-                            config.isStrikeThrough = parseFBoolean(tokensForValue)
+                            config.isStrikeThrough = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                config.isStrikeThrough?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                config.isStrikeThrough?.value = parseFBoolean(tokensForValue)
+                            }
                         }
 
                         else -> {
@@ -1254,7 +1373,14 @@ object Parser {
                         }
 
                         is AutoCorrectContext -> {
-                            keyboardOptions.autoCorrect = parseFBoolean(tokensForValue)
+                            keyboardOptions.autoCorrect = ExpressionWithValue()
+
+                            if (tokensForValue.payload is AttrExpressionContext) {
+                                keyboardOptions.autoCorrect?.expression =
+                                    parseAttrExpression(tokensForValue)
+                            } else {
+                                keyboardOptions.autoCorrect?.value = parseFBoolean(tokensForValue)
+                            }
                         }
 
                         is KeyboardTypeContext -> {
@@ -1544,7 +1670,7 @@ object Parser {
             }
 
             is FieldExprContext -> {
-                parseFieldExpr(second)
+                parseFieldExpr(first)
             }
 
             else -> throw IllegalArgumentException(ILLEGAL_ARGUMENT + IF_VALUES)
@@ -1554,8 +1680,7 @@ object Parser {
             null -> null
 
             is ConstsContext -> {
-                parseConst(first.getChild(0))
-
+                parseConst(second.getChild(0))
             }
 
             is FieldExprContext -> {

@@ -1,5 +1,7 @@
 package types
 
+import types.expressions.ExpressionWithValue
+
 data class Config(
     var color: String? = null,
 
@@ -16,10 +18,10 @@ data class Config(
     /**
      * Whether text should be underlined
      */
-    var isUnderline: Boolean? = null,
+    var isUnderline: ExpressionWithValue<Boolean>? = null,
 
     /**
      * Whether text should have strike through
      */
-    var isStrikeThrough: Boolean? = null,
+    var isStrikeThrough: ExpressionWithValue<Boolean>? = null,
 )

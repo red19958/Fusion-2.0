@@ -1,5 +1,7 @@
 package types
 
+import types.expressions.ExpressionWithValue
+
 data class KeyboardOptions(
 
     /**
@@ -10,7 +12,7 @@ data class KeyboardOptions(
     /**
      * The text being entered should have auto-correction applied to it
      */
-    var autoCorrect: Boolean? = false,
+    var autoCorrect: ExpressionWithValue<Boolean>? = null,
 
     /**
      * Specifies set of displayed keys of the keyboard (e.g. standard, numbers only, ..)

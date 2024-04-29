@@ -15,7 +15,7 @@ import org.antlr.v4.runtime.dfa.DFA
 class DSLGrammarLexer(input: CharStream?) : Lexer(input) {
     @Deprecated("")
     override fun getTokenNames(): Array<String> {
-        return Companion.tokenNames
+        return tokenNames
     }
 
     override fun getVocabulary(): Vocabulary {
