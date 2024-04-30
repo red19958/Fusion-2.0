@@ -7,6 +7,7 @@ import attributes.TextAttributes
 import attributes.TextFieldAttributes
 import grammar.DSLGrammarParser.*
 import attributes.base.LayoutAttributes
+import attributes.base.TapAttributes
 import attributes.base.ViewAttributes
 import grammar.DSLGrammarLexer
 import grammar.DSLGrammarParser
@@ -73,6 +74,7 @@ object Parser {
                         BoxNode(
                             attributes.first,
                             attributes.second,
+                            attributes.third,
                             mutableListOf(),
                         )
                     )
@@ -85,6 +87,7 @@ object Parser {
                         ColumnNode(
                             attributes.first,
                             attributes.second,
+                            attributes.third,
                             mutableListOf(),
                         )
                     )
@@ -97,6 +100,7 @@ object Parser {
                         RowNode(
                             attributes.first,
                             attributes.second,
+                            attributes.third,
                             mutableListOf(),
                         )
                     )
@@ -109,6 +113,7 @@ object Parser {
                         LazyColumnNode(
                             attributes.first,
                             attributes.second,
+                            attributes.third,
                             mutableListOf(),
                         )
                     )
@@ -121,6 +126,7 @@ object Parser {
                         LazyRowNode(
                             attributes.first,
                             attributes.second,
+                            attributes.third,
                             mutableListOf(),
                         )
                     )
@@ -134,6 +140,7 @@ object Parser {
                         FlowRowNode(
                             attributes.first,
                             attributes.second,
+                            attributes.third,
                             flowRowAttributes,
                             mutableListOf(),
                         )
@@ -148,6 +155,7 @@ object Parser {
                         TextNode(
                             attributes.first,
                             attributes.second,
+                            attributes.third,
                             textAttr,
                         )
                     )
@@ -161,6 +169,7 @@ object Parser {
                         TextFieldNode(
                             attributes.first,
                             attributes.second,
+                            attributes.third,
                             textFieldAttr,
                         )
                     )
@@ -174,6 +183,7 @@ object Parser {
                         ImageNode(
                             attributes.first,
                             attributes.second,
+                            attributes.third,
                             imageAttr,
                         )
                     )
@@ -318,9 +328,11 @@ object Parser {
         return state
     }
 
-    private fun parseBaseAttributes(tokens: ParseTree): Pair<ViewAttributes, LayoutAttributes> {
+    private fun parseBaseAttributes(tokens: ParseTree): Triple<ViewAttributes, LayoutAttributes, TapAttributes> {
         val viewAttributes = ViewAttributes()
         val layoutAttributes = LayoutAttributes()
+        val onTapList = mutableListOf<TapExpression>()
+        val onLongTapList = mutableListOf<TapExpression>()
 
         for (i in 0 until tokens.childCount) {
             val temp = tokens.getChild(i)
@@ -330,6 +342,7 @@ object Parser {
                     val tokensForNode = temp.getChild(0)
                     val attrToken = tokensForNode.getChild(0)
                     val tokensForValue = tokensForNode.getChild(2)
+                    val tokensForExpression = tokensForValue.getChild(0)
 
                     when (attrToken.text) {
                         HEIGHT -> {
@@ -345,7 +358,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 layoutAttributes.weight?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 layoutAttributes.weight?.value = parseFDouble(tokensForValue)
                             }
@@ -369,6 +382,7 @@ object Parser {
                     val tokensForNode = temp.getChild(0)
                     val attrToken = tokensForNode.getChild(0)
                     val tokensForValue = tokensForNode.getChild(2)
+                    val tokensForExpression = tokensForValue.getChild(0)
 
                     when (attrToken.text) {
                         TEST_TAG -> {
@@ -376,7 +390,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 viewAttributes.testTag?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 viewAttributes.testTag?.value = parseFString(tokensForValue)
                             }
@@ -387,7 +401,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 viewAttributes.alpha?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 viewAttributes.alpha?.value = parseFDouble(tokensForValue).toFloat()
                             }
@@ -406,7 +420,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 viewAttributes.isEnabled?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 viewAttributes.isEnabled?.value = parseFBoolean(tokensForValue)
                             }
@@ -417,7 +431,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 viewAttributes.isVisible?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 viewAttributes.isVisible?.value = parseFBoolean(tokensForValue)
                             }
@@ -429,11 +443,49 @@ object Parser {
                     }
                 }
 
+                is TapAttrContext -> {
+                    val tokensForNode = temp.getChild(0)
+                    val attrToken = tokensForNode.getChild(0)
+
+                    when (attrToken.text) {
+                        ON_TAP -> {
+                            for (j in 0 until tokensForNode.childCount) {
+                                val curToken = tokensForNode.getChild(j)
+
+                                if (curToken is TapExpressionContext) {
+                                    val variableName = curToken.getChild(0).text
+                                    val expressionType = parseAttrExpression(curToken.getChild(2))
+                                    val tapExpression = TapExpression(variableName, expressionType)
+                                    onTapList.add(tapExpression)
+                                }
+                            }
+                        }
+
+                        ON_LONG_TAP -> {
+                            for (j in 0 until tokensForNode.childCount) {
+                                val curToken = tokensForNode.getChild(j)
+
+                                if (curToken is TapExpressionContext) {
+                                    val variableName = curToken.getChild(0).text
+                                    val expressionType = parseAttrExpression(curToken.getChild(2))
+                                    val tapExpression = TapExpression(variableName, expressionType)
+                                    onLongTapList.add(tapExpression)
+                                }
+                            }
+                        }
+                    }
+                }
+
                 else -> {}
             }
         }
 
-        return Pair(viewAttributes, layoutAttributes)
+        val tapAttributes = TapAttributes(
+            onTap = if (onTapList.isEmpty()) null else onTapList,
+            onLongTap = if (onLongTapList.isEmpty()) null else onLongTapList,
+        )
+
+        return Triple(viewAttributes, layoutAttributes, tapAttributes)
     }
 
     private fun parseFlowRowAttributes(tokens: ParseTree): FlowRowAttributes {
@@ -446,6 +498,7 @@ object Parser {
                 is FlowRowAttrContext -> {
                     val attrToken = temp.getChild(0).getChild(0)
                     val tokensForValue = temp.getChild(0).getChild(2)
+                    val tokensForExpression = tokensForValue.getChild(0)
 
                     when (attrToken.text) {
                         MAX_LINES_COUNT -> {
@@ -453,7 +506,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 flowRowAttributes.maxLinesCount?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 flowRowAttributes.maxLinesCount?.value = parseFInt(tokensForValue)
                             }
@@ -492,6 +545,7 @@ object Parser {
                     val tokensForParsingNode = temp.getChild(0)
                     val attrToken = tokensForParsingNode.getChild(0)
                     val tokensForValue = tokensForParsingNode.getChild(2)
+                    val tokensForExpression = tokensForValue.getChild(0)
 
                     when (attrToken.text) {
                         TEXT -> {
@@ -499,7 +553,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 textAttributes.text?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 textAttributes.text?.value = parseFString(tokensForValue)
                             }
@@ -522,7 +576,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 textAttributes.maxLines?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 textAttributes.maxLines?.value = parseFInt(tokensForValue)
                             }
@@ -567,7 +621,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 imageAttributes.source?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForValue.getChild(0))
                             } else {
                                 imageAttributes.source?.value = parseFString(tokensForValue)
                             }
@@ -578,7 +632,7 @@ object Parser {
 
                             if (tokensForColor.payload is AttrExpressionContext) {
                                 imageAttributes.placeholder?.expression =
-                                    parseAttrExpression(tokensForColor)
+                                    parseAttrExpression(tokensForColor.getChild(0))
                             } else {
                                 imageAttributes.placeholder?.value = parseString(tokensForColor)
                             }
@@ -589,7 +643,7 @@ object Parser {
 
                             if (tokensForColor.payload is AttrExpressionContext) {
                                 imageAttributes.placeHolderTint?.expression =
-                                    parseAttrExpression(tokensForColor)
+                                    parseAttrExpression(tokensForColor.getChild(0))
                             } else {
                                 imageAttributes.placeHolderTint?.value = parseString(tokensForColor)
                             }
@@ -600,7 +654,7 @@ object Parser {
 
                             if (tokensForColor.payload is AttrExpressionContext) {
                                 imageAttributes.tint?.expression =
-                                    parseAttrExpression(tokensForColor)
+                                    parseAttrExpression(tokensForColor.getChild(0))
                             } else {
                                 imageAttributes.tint?.value = parseString(tokensForColor)
                             }
@@ -638,6 +692,7 @@ object Parser {
                     val tokensForParsingNode = temp.getChild(0)
                     val attrToken = tokensForParsingNode.getChild(0)
                     val tokensForValue = tokensForParsingNode.getChild(2)
+                    val tokensForExpression = tokensForValue.getChild(0)
 
                     when (attrToken.text) {
                         TEXT -> {
@@ -645,7 +700,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 textFieldAttributes.text?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 textFieldAttributes.text?.value = parseFString(tokensForValue)
                             }
@@ -668,7 +723,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 textFieldAttributes.isMultiline?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 textFieldAttributes.isMultiline?.value =
                                     parseFBoolean(tokensForValue)
@@ -993,12 +1048,13 @@ object Parser {
                         is ColorContext -> {
                             val tokensForValue = tokensForParsingNode.getChild(2)
                             val tokensForColor = tokensForValue.getChild(2)
+                            val tokensForExpression = tokensForColor.getChild(0)
 
                             background.color = ExpressionWithValue()
 
                             if (tokensForColor.payload is AttrExpressionContext) {
                                 background.color?.expression =
-                                    parseAttrExpression(tokensForColor)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 background.color?.value = parseString(tokensForColor)
                             }
@@ -1028,6 +1084,7 @@ object Parser {
                     val tokensForParsingNode = temp.getChild(0)
                     val tokensForValue = tokensForParsingNode.getChild(2)
                     val tokensForColor = tokensForValue.getChild(2)
+                    val tokensForExpression = tokensForColor.getChild(0)
 
                     when (tokensForParsingNode) {
                         is WidthExactContext -> {
@@ -1039,7 +1096,7 @@ object Parser {
 
                             if (tokensForColor.payload is AttrExpressionContext) {
                                 border.color?.expression =
-                                    parseAttrExpression(tokensForColor)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 border.color?.value = parseString(tokensForColor)
                             }
@@ -1261,6 +1318,7 @@ object Parser {
                 is ConfigAttrContext -> {
                     val tokensForParsingNode = temp.getChild(0)
                     val tokensForValue = tokensForParsingNode.getChild(2)
+                    val tokensForExpression = tokensForValue.getChild(0)
 
                     when (tokensForParsingNode) {
                         is FontSizeContext -> {
@@ -1281,7 +1339,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 config.isUnderline?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 config.isUnderline?.value = parseFBoolean(tokensForValue)
                             }
@@ -1292,7 +1350,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 config.isStrikeThrough?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 config.isStrikeThrough?.value = parseFBoolean(tokensForValue)
                             }
@@ -1366,6 +1424,7 @@ object Parser {
                 is KeyboardOptionsContext -> {
                     val tokensForParsingNode = temp.getChild(0)
                     val tokensForValue = tokensForParsingNode.getChild(2)
+                    val tokensForExpression = tokensForValue.getChild(0)
 
                     when (tokensForParsingNode) {
                         is CapitalizationContext -> {
@@ -1377,7 +1436,7 @@ object Parser {
 
                             if (tokensForValue.payload is AttrExpressionContext) {
                                 keyboardOptions.autoCorrect?.expression =
-                                    parseAttrExpression(tokensForValue)
+                                    parseAttrExpression(tokensForExpression)
                             } else {
                                 keyboardOptions.autoCorrect?.value = parseFBoolean(tokensForValue)
                             }
@@ -1557,15 +1616,13 @@ object Parser {
     }
 
     private fun parseAttrExpression(tokens: ParseTree): AttrExpressionType {
-        val child = tokens.getChild(0)
-
-        return when (child.payload) {
+        return when (tokens.payload) {
             is IfExprContext -> {
-                parseIfThen(child)
+                parseIfThen(tokens)
             }
 
             is FieldExprContext -> {
-                parseFieldExpr(child)
+                parseFieldExpr(tokens)
             }
 
             else -> {
@@ -1833,4 +1890,7 @@ object Parser {
     private const val FDOUBLE = "FDOUBLE"
 
     private const val EQUAL = "=="
+
+    private const val ON_TAP = "onTap"
+    private const val ON_LONG_TAP = "onLongTap"
 }

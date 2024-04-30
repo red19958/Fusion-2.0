@@ -5,10 +5,10 @@ sealed interface AttrExpressionType {
         val condition: Condition,
         val trueValue: ValueExpression,
         val falseValue: ValueExpression? = null,
-    ) : AttrExpressionType, TapExpressionType
+    ) : AttrExpressionType
 
     data class FieldExpr(
         val name: String,
         val get: GetExpression? = null,
-    ) : AttrExpressionType, TapExpressionType, ValueExpression
+    ) : AttrExpressionType, ValueExpression
 }

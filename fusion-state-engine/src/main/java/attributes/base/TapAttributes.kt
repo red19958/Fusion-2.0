@@ -1,9 +1,8 @@
 package attributes.base
 
-import types.expressions.TapExpressions
+import types.expressions.TapExpression
 
 data class TapAttributes(
-    val onTap: TapExpressions? = null,
-    val onLongTap: TapExpressions? = null,
-    val onPressedChange: TapExpressions? = null,
+    val onTap: List<TapExpression>? = null,
+    val onLongTap: List<TapExpression>? = null,
 )

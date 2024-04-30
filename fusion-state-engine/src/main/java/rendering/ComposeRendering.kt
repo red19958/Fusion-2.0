@@ -3,8 +3,10 @@ package rendering
 import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.graphics.drawable.ColorDrawable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -60,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import attributes.base.LayoutAttributes
+import attributes.base.TapAttributes
 import attributes.base.ViewAttributes
 import com.bumptech.glide.integration.compose.CrossFade
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -98,6 +101,7 @@ import types.expressions.AttrExpressionType
 import types.expressions.Const
 import types.expressions.ExpressionWithValue
 import types.expressions.GetExpression
+import types.expressions.TapExpression
 import util.FList
 import util.FMap
 
@@ -110,7 +114,7 @@ object ComposeRendering {
         Render(node = pair.first, remember { mutableStateOf(pair.second) })
     }
 
-    @OptIn(ExperimentalGlideComposeApi::class)
+    @OptIn(ExperimentalGlideComposeApi::class, ExperimentalFoundationApi::class)
     @Composable
     private fun Render(
         node: Node,
@@ -651,10 +655,12 @@ object ComposeRendering {
         var result = this
         val viewAttributes = node.viewAttributes
         val layoutAttributes = node.layoutAttributes
+        val tapAttributes = node.tapAttributes
 
         result = result
             .renderLayoutAttr(layoutAttributes, ignoreHeight, ignoreWidth)
             .renderViewAttr(viewAttributes, realState = realState)
+            .renderTapAttr(tapAttributes, realState = realState)
 
         return result
     }
@@ -884,6 +890,41 @@ object ComposeRendering {
         }
 
         return result
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    private fun Modifier.renderTapAttr(
+        tapAttributes: TapAttributes,
+        realState: MutableState<State>
+    ): Modifier {
+        var result = this
+        val onTap = tapAttributes.onTap
+        val onLongTap = tapAttributes.onLongTap
+
+        if (onLongTap != null || onTap != null) {
+            result = result.combinedClickable(onLongClick = {
+                if (onLongTap != null) {
+                    for (expression in onLongTap) {
+                        changeRealStateVariable(expression, realState)
+                    }
+                }
+            }) {
+                if (onTap != null) {
+                    for (expression in onTap) {
+                        changeRealStateVariable(expression, realState)
+                    }
+                }
+            }
+        }
+
+        return result
+    }
+
+    private fun changeRealStateVariable(expression: TapExpression, realState: MutableState<State>) {
+        val map = realState.value.map
+        val attr = getAttrFromExpression<Any>(expression.expressionType, realState)
+        map[expression.variableName] = attr
+        realState.value = State(map)
     }
 
     private fun Align.toTextAlign(): TextAlign {

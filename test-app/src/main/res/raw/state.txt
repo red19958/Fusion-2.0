@@ -24,7 +24,7 @@ Column {
             width { fill }
 
             text {
-                "Планшет Apple iPad 10.2 2021, 64GB 256GB, Wi-Fi • Новый • Оригинальный • Быстрая доставка в РФ".c
+                title
             }
 
             lineHeight { 18.np }
