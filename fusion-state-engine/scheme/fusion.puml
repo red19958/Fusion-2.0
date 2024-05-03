@@ -1,0 +1,20 @@
+@startuml
+actor Developer
+participant FusionDSL
+participant BinaryCompiler
+participant Server
+participant Client [
+=Client
+----
+FusionEngine
+]
+
+Developer -> FusionDSL: Пишет код на FusionDSL
+FusionDSL -> BinaryCompiler: Код передается в BinaryCompiler
+BinaryCompiler -> BinaryCompiler: Компилирует переданный код
+BinaryCompiler -> BinaryCompiler: Скомпилированный код преобразует в бинарный файл
+BinaryCompiler -> Server: Передает полученный бинарный файл
+Server -> Client: Отправляет молекулы
+Client -> Client: Преобразует бинарный файл в дерево выражений
+Client -> Client: Строит UI по дереву
+@enduml

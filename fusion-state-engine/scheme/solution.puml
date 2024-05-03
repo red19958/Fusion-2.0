@@ -1,0 +1,16 @@
+@startuml
+actor Developer
+participant FusionDSL
+participant Server
+participant Client [
+=Client
+----
+FusionComposeEngine
+]
+
+Developer -> FusionDSL: Пишет код на FusionDSL
+FusionDSL -> Server: Передает текстовое описание DSL
+Server -> Client: Отправляет молекулы
+Client -> Client: Разбирает текстовое описание молекулы в дерево
+Client -> Client: Строит UI по дереву
+@enduml
