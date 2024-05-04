@@ -894,14 +894,6 @@ object ComposeRendering {
         val weight = layoutAttributes.weight
         val margin = layoutAttributes.margin
 
-        if (!ignoreHeight || weight == null) {
-            result = result.setHeight(height)
-        }
-
-        if (!ignoreWidth || weight == null) {
-            result = result.setWidth(width)
-        }
-
         if (margin != null) {
             val left = margin.left.toDp()
             val right = margin.right.toDp()
@@ -917,6 +909,14 @@ object ComposeRendering {
                 )
 
             result = result.padding(paddingValues)
+        }
+
+        if (!ignoreHeight || weight == null) {
+            result = result.setHeight(height)
+        }
+
+        if (!ignoreWidth || weight == null) {
+            result = result.setWidth(width)
         }
 
         return result
