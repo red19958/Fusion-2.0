@@ -19,9 +19,12 @@ import nodes.layout.BoxNode
 import nodes.layout.ColumnNode
 import nodes.layout.FlowRowNode
 import nodes.layout.LayoutNode
-import nodes.layout.LazyColumnNode
-import nodes.layout.LazyRowNode
+import nodes.layout.lazy.LazyColumnNode
+import nodes.layout.lazy.LazyRowNode
 import nodes.layout.RowNode
+import nodes.layout.lazy.Parts
+import nodes.layout.lazy.Parts.Item
+import nodes.layout.lazy.Parts.Items
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonToken
 import org.antlr.v4.runtime.CommonTokenStream
@@ -108,28 +111,88 @@ object Parser {
 
                 is LazyColumnContext -> {
                     val attributes = parseBaseAttributes(temp)
+                    val partsList = mutableListOf<Parts>()
+
+                    for (j in 0 until temp.childCount) {
+                        val cur = temp.getChild(j)
+
+                        when (cur.payload) {
+                            is ItemsContext -> {
+                                val child = parseTokens(cur.getChild(5), mutableListOf()).first()
+                                val tokensForValue = cur.getChild(2)
+                                val items = Items(ExpressionWithValue(), child)
+
+                                if (tokensForValue.payload is FieldExprContext) {
+                                    items.size.expression = parseFieldExpr(tokensForValue)
+                                } else {
+                                    items.size.value = parseFLong(tokensForValue).toInt()
+                                }
+
+                                partsList.add(items)
+                            }
+
+                            is ItemContext -> {
+                                val child = parseTokens(cur.getChild(2), mutableListOf()).first()
+                                partsList.add(Item(child))
+                            }
+
+                            else -> continue
+                        }
+                    }
 
                     result.add(
                         LazyColumnNode(
                             attributes.first,
                             attributes.second,
                             attributes.third,
-                            mutableListOf(),
+                            partsList,
                         )
                     )
+
+                    continue
                 }
 
                 is LazyRowContext -> {
                     val attributes = parseBaseAttributes(temp)
+                    val partsList = mutableListOf<Parts>()
+
+                    for (j in 0 until temp.childCount) {
+                        val cur = temp.getChild(j)
+
+                        when (cur.payload) {
+                            is ItemsContext -> {
+                                val child = parseTokens(cur.getChild(5), mutableListOf()).first()
+                                val tokensForValue = cur.getChild(2)
+                                val items = Items(ExpressionWithValue(), child)
+
+                                if (tokensForValue.payload is FieldExprContext) {
+                                    items.size.expression = parseFieldExpr(tokensForValue)
+                                } else {
+                                    items.size.value = parseFLong(tokensForValue).toInt()
+                                }
+
+                                partsList.add(items)
+                            }
+
+                            is ItemContext -> {
+                                val child = parseTokens(cur.getChild(2), mutableListOf()).first()
+                                partsList.add(Item(child))
+                            }
+
+                            else -> continue
+                        }
+                    }
 
                     result.add(
                         LazyRowNode(
                             attributes.first,
                             attributes.second,
                             attributes.third,
-                            mutableListOf(),
+                            partsList,
                         )
                     )
+
+                    continue
                 }
 
                 is FlowRowContext -> {
@@ -193,12 +256,17 @@ object Parser {
                     if (result.isEmpty()) {
                         parseTokens(temp, result)
                     } else {
-                        (result.first() as LayoutNode).children.addAll(
-                            parseTokens(
-                                temp,
-                                mutableListOf(),
-                            )
-                        )
+                        when (result.first()) {
+                            is LayoutNode -> {
+                                (result.first() as LayoutNode).children.addAll(
+                                    parseTokens(
+                                        temp,
+                                        mutableListOf(),
+                                    )
+                                )
+                            }
+                        }
+
                     }
 
                     continue

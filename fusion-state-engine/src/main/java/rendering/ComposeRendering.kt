@@ -78,9 +78,12 @@ import nodes.layout.BoxNode
 import nodes.layout.ColumnNode
 import nodes.layout.FlowRowNode
 import nodes.layout.LayoutNode
-import nodes.layout.LazyColumnNode
-import nodes.layout.LazyRowNode
+import nodes.layout.lazy.LazyColumnNode
+import nodes.layout.lazy.LazyRowNode
 import nodes.layout.RowNode
+import nodes.layout.lazy.LazyListNode
+import nodes.layout.lazy.Parts.Item
+import nodes.layout.lazy.Parts.Items
 import util.State
 import types.Align
 import types.AnimateChanges
@@ -148,6 +151,16 @@ object ComposeRendering {
         when (node) {
             is LayoutNode -> {
                 RenderLayoutNode(
+                    node = node,
+                    realState = realState,
+                    ignoreHeight = ignoreHeight,
+                    ignoreWidth = ignoreWidth,
+                    parenModification = parenModification,
+                )
+            }
+
+            is LazyListNode -> {
+                RenderLazyLayoutNode(
                     node = node,
                     realState = realState,
                     ignoreHeight = ignoreHeight,
@@ -457,14 +470,64 @@ object ComposeRendering {
                 }
             }
 
+
+        }
+    }
+
+    @Composable
+    private fun RenderLazyLayoutNode(
+        node: LazyListNode,
+        realState: MutableState<State>,
+        ignoreHeight: Boolean = false,
+        ignoreWidth: Boolean = false,
+        parenModification: ParentModification? = null
+    ) {
+        val isVisible = node.viewAttributes.isVisible
+        val isVisibleValue = if (isVisible?.value != null) {
+            isVisible.value!!
+        } else if (isVisible?.expression != null) {
+            getAttrFromExpression(
+                isVisible.expression!!,
+                realState = realState
+            )
+        } else {
+            true
+        }
+
+        if (!isVisibleValue) return
+
+        var modifier = parenModification?.let { it(node) } ?: Modifier
+        modifier = modifier.renderBaseAttr(
+            node = node,
+            realState = realState,
+            ignoreHeight = ignoreHeight,
+            ignoreWidth = ignoreWidth
+        )
+
+        when (node) {
             is LazyColumnNode -> {
                 LazyColumn(modifier) {
-                    items(node.children.size) {
-                        for (child in node.children) {
-                            Render(
-                                node = child,
-                                realState = realState
-                            ) // TODO: rework
+                    for (child in node.children) {
+                        when (child) {
+                            is Item -> {
+                                item {
+                                    Render(node = child.child, realState = realState)
+                                }
+                            }
+
+                            is Items -> {
+                                val size = if (child.size.value != null) {
+                                    child.size.value!!
+                                } else if (child.size.expression != null) {
+                                    getAttrFromExpression<Int>(child.size.expression!!, realState)
+                                } else {
+                                    throw IllegalArgumentException()
+                                }
+
+                                items(size) {
+                                    Render(node = child.child, realState = realState)
+                                }
+                            }
                         }
                     }
                 }
@@ -472,14 +535,33 @@ object ComposeRendering {
 
             is LazyRowNode -> {
                 LazyRow(modifier) {
-                    items(node.children.size) {
-                        for (child in node.children) {
-                            Render(node = child, realState = realState) // TODO: rework
+                    for (child in node.children) {
+                        when (child) {
+                            is Item -> {
+                                item {
+                                    Render(node = child.child, realState = realState)
+                                }
+                            }
+
+                            is Items -> {
+                                val size = if (child.size.value != null) {
+                                    child.size.value!!
+                                } else if (child.size.expression != null) {
+                                    getAttrFromExpression<Int>(child.size.expression!!, realState)
+                                } else {
+                                    throw IllegalArgumentException()
+                                }
+
+                                items(size) {
+                                    Render(node = child.child, realState = realState)
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+
     }
 
     /**

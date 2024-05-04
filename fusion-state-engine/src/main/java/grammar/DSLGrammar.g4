@@ -36,7 +36,7 @@ flowRow: FLOW_ROW LEFT_FIGURE_BRACE (layoutAttr | viewAttr | tapAttr | flowRowAt
 lazyColumn: LAZY_COLUMN LEFT_FIGURE_BRACE (layoutAttr | viewAttr | tapAttr | item | items)* RIGHT_FIGURE_BRACE;
 lazyRow: LAZY_ROW LEFT_FIGURE_BRACE (layoutAttr | viewAttr | tapAttr | item | items)* RIGHT_FIGURE_BRACE;
 item: ITEM LEFT_FIGURE_BRACE (node | layoutNode) RIGHT_FIGURE_BRACE;
-items: ITEMS LEFT_BRACE FIELD_NAME RIGHT_BRACE LEFT_FIGURE_BRACE (node | layoutNode) RIGHT_FIGURE_BRACE;
+items: ITEMS LEFT_BRACE (fieldExpr | FLONG) RIGHT_BRACE LEFT_FIGURE_BRACE (node | layoutNode) RIGHT_FIGURE_BRACE;
 
 attrExpression: (ifExpr | fieldExpr);
 ifExpr: IF_THEN LEFT_BRACE condition COMMA ifValues RIGHT_BRACE;
