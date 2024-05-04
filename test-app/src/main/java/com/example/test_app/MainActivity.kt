@@ -7,18 +7,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.example.test_app.databinding.MainActivityBinding
 import parser.Parser
 import rendering.ComposeRendering
 import java.lang.StringBuilder
 
 class MainActivity : ComponentActivity() {
-
-    private lateinit var binding: MainActivityBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = MainActivityBinding.inflate(layoutInflater)
 
         val inputStream = this.resources.openRawResource(R.raw.state)
         val reader = inputStream.bufferedReader()
